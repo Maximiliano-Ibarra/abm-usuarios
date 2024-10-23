@@ -1,10 +1,11 @@
 <template>
-    <div class="prueba">
-        <h1>Alta de Usuarios</h1>
-    </div>
+    <main>
+        <UsersList />
+    </main>
 </template>
 
 <script setup>
+    import UsersList from '../components/UsersList.vue'
 </script>
 
 <style scoped>
