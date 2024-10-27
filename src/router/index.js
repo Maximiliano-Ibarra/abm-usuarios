@@ -20,6 +20,7 @@ const router = createRouter({
       component: () => import('../views/UsersList.vue')
     }
   ]
-})
+});
+
 
 export default router
