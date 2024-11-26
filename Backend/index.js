@@ -1,12 +1,15 @@
-//const express = require('express');
-//const dbconnection = require('sequelize');
-//const routes = require('./routes/usersRouter');
-import express from 'express'
-import usersRouter from './routes/usersRouter.js'
+import cors from 'cors';
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import bcryptjs from 'bcrypt';
+import usersRouter from './routes/usersRouter.js';
 import { sequelize } from './config/connection.js';
 const app = express();
 const PORT = 3000;
 
+app.use(cors({
+    origin: 'http://localhost:5173'
+}));
 app.use(express.json());
 app.use('/api', usersRouter);
 

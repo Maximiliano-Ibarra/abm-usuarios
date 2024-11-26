@@ -4,43 +4,63 @@
     <form @submit.prevent="registerUser">
       <div class="form-group">
         <label for="username">Usuario</label><br>
-        <input v-model="username" label="Nombre" required></input>
+        <input class="input-field"v-model="user.username" id="username" required />
       </div>
       <div class="form-group">
         <label for="email">Correo electrónico</label><br>
-        <input v-model="email" label="E-mail" required></input>
+        <input class="input-field" v-model="user.email"id="email" required />
       </div>
       <div class="form-group">
         <label for="password">Contraseña</label><br>
-        <input v-model="password" label="Contraseña" type="password" required></input>
+        <input class="input-field" v-model="user.password" type="password" id="password" required />
       </div>
-      <button type="submit" color="primary">Registrar</button>
+      <button type="submit">Registrar</button>
+      <br/>
     </form>
+    <p class="error-message" v-if="statusMessage">{{ statusMessage }}</p>
   </div>
 </template>
 
 <script>
-  export const object = {
+  export default {
     data() {
       return {
-        user: { username: '', email: '', password: '' }
+        user: {
+          username: '',
+          email: '',
+          password: ''
+        },
+          statusMessage: ''
       };
     },
     methods: {
       async registerUser() {
         try {
-          const response = await fetch('http://localhost:3000/usuarios', {
+          const response = await fetch('http://localhost:3000/api/usuarios', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.user)
+            body: JSON.stringify({
+              username: this.user.username,
+              email: this.user.email,
+              password: this.user.password
+            })
             }
           );
           const data = await response.json();
+          this.statusMessage = 'Usuario registrado correctamente'
           console.log(data);
+
+          this.cleanFields();
         }
         catch (error) {
+          this.statusMessage = 'Ocurrió un problema al registrar el usuario'
           console.error('Error:', error);
         }
+      },
+      cleanFields() {
+        this.user.username = '',
+        this.user.email = '',
+        this.user.password = ''
       }
     }
   };
@@ -52,13 +72,19 @@
   margin: auto;
   border: 5px solid rgb(117, 92, 92); /* Cambia el color y el grosor del borde */
             padding: 20px; /* Espacio interno */
-      background-color:rgb(176, 196, 186);
+      background-color:#f8ffd7;
   border-radius: 5px;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   align-content: center;
+}
+
+.input-field {
+  width: 100%; /* Ajusta el ancho según tus necesidades */
+  padding: 5px; /* Ajusta el relleno según tus necesidades */
+  font-size: 16px; /* Ajusta el tamaño de la fuente según tus necesidades */
 }
 
 .error-message {

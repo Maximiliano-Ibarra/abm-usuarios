@@ -3,12 +3,20 @@ import User from '../models/usersModel.js'
 export const userController = {
     createUser: async(req, res) => {
         try {
-            const { username, password, email } = req.body;
-            const newUser = await User.createUser({username, password, email})
+            const { username, email, password } = req.body;
+
+            if (!username || !email || !password) {
+                return res.status(400).json({ error: 'Faltan datos requeridos.' });
+            }
+
+            console.log('Datos recibidos:', { username, email, password }); // Depuración
+
+            const newUser = await User.create({username, email, password})
             res.status(201).json(newUser);
         }
         catch (error) {
-            res.status(500).json({error: 'Error al insertar usuario:'});
+            res.status(500).json({error: 'Error al insertar usuario:', details: error.message});
+            console.error('Error en createUser:', error.message, error.stack);
         }
     },
     getAllUsers : async(req, res) => {
@@ -17,19 +25,38 @@ export const userController = {
             res.status(200).json(users);
         }
         catch (error) {
+            res.status(500).json({error: 'Error al obtener usuarios:', details: error.message});
+        }
+    },
+    getUser : async(req, res) => {
+        try {
+            const userId = req.params.id
+            const user = await User.findByPk(userId)
+            res.status(200).json(user);
+        }
+        catch (error) {
             res.status(500).json({error: 'Error al obtener usuario:', details: error.message});
         }
     },
     updateUser : async(req, res) => {
         try {
-            const { id } = req.params;
-            const { password, email } = req.body;
+            const id = req.params.id;
+            const { username, email, password } = req.body;
             const user = await User.findByPk(id);
             if(!user) {
-                return res.status(404).json({error: 'Usuario no encontrado'});
+                return res.status(404).json({error: 'Usuario no encontrado', details: error.message});
             }
-            await User.update({password, email})
-            res.status(200).json(usuario)
+
+            const updateData = {}
+            if(username) updateData.username = username;
+            if(password) updateData.password = password;
+            if(email) updateData.email = email;
+
+            const updatedUser = await user.update(updateData)
+            res.status(200).json({
+                message: 'Usuario actualizado con éxito.',
+                user: updatedUser
+            })
         }
         catch (error) {
             res.status(500).json({error: 'Error al actualizar usuario:'});
@@ -37,68 +64,15 @@ export const userController = {
     },
     deleteUser : async(req, res) => {
         try {
-            const { id } = req.params;
-            const user = await User.findByPk(id);
-            if (!user) {
-                return res.status(404).json({ message: 'Usuario no encontrado' });
+            const userId = req.params.id;
+            const result = await User.destroy({ where: { id: userId } });
+            if (result === 0) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
             }
-            await User.destroy();
             res.status(204).send();
         }
         catch (error) {
-            res.status(500).json({error: 'Error al eliminar usuario:'})
+            res.status(500).json({error: 'Error al eliminar usuario:', details: error.message})
         }
     }
 }
-
-// exports.createUser = async(req, res) => {
-//     try {
-//         const { username, password, email } = req.body;
-//         const newUser = await user.createUser({username, password, email})
-//         res.status(201).json(newUser);
-//     }
-//     catch (error) {
-//         res.status(500).json({error: 'Error al insertar usuario:'});
-//     }
-// }
-
-// exports.getUsers = async(req, res) => {
-//     try {
-//         const users = await user.findAll()
-//         res.status(200).json(users);
-//     }
-//     catch (error) {
-//         res.status(500).json({error: 'Error al obtener usuario:'});
-//     }
-// }
-
-// exports.updateUser = async(req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const { password, email } = req.body;
-//         const user = await user.findByPk(id);
-//         if(!user) {
-//             return res.status(404).json({error: 'Usuario no encontrado'});
-//         }
-//         await user.update({password, email})
-//         res.status(200).json(usuario)
-//     }
-//     catch (error) {
-//         res.status(500).json({error: 'Error al actualizar usuario:'});
-//     }
-// }
-
-// exports.deleteUser = async(req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const user = await user.findByPk(id);
-//         if (!user) {
-//             return res.status(404).json({ message: 'Usuario no encontrado' });
-//         }
-//         await user.destroy();
-//         res.status(204).send();
-//     }
-//     catch (error) {
-//         res.status(500).json({error: 'Error al eliminar usuario:'})
-//     }
-// }

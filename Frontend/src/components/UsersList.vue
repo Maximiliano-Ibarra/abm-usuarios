@@ -3,26 +3,24 @@
     <table>
         <thead>
             <tr>
-                <th>-</th>
                 <th>Usuario</th>
                 <th>E-mail</th>
                 <th>Rol</th>
-                <th>-</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="user in users" :key="user.id">
-                <td><router-link :to="{ path: '/ModificarUsuarios', query: { id: user.id } }"><img src="@/assets/pencil.png" width="16" height="16" title="Modificar usuario"></router-link></td>
-                <td>{{ user.name }}</td>
+                <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.role }}</td>
-                <td><router-link :to="{ path: '/BorrarUsuarios', query: { id: user.id } }"><img src="@/assets/delete.png" width="16" height="16" title="Borrar usuario"></router-link></td>
+                <td style="text-align: center;">{{ user.role }}</td>
+                <td>
+                    <button @click="confirmEditUser(user.id)" style="margin-right: 10px;"><img src="@/assets/pencil.png" width="16" height="16" title="Modificar usuario"></img></button>
+                    <button @click="confirmDeleteUser(user.id)"><img src="@/assets/delete.png" width="16" height="16" title="Eliminar usuario"></img></button>
+                </td>
             </tr>
         </tbody>
     </table>
-    <div v-if="!users.length" class="no-users-message">
-      No hay usuarios registrados.
-    </div>
 </div>
 </template>
 
@@ -40,14 +38,19 @@
     border-collapse: collapse;
     }
 
-    th, td {
+    th {
         border: 1px solid black;
+        background-color: #f4f4f4;
         padding: 8px;
-        text-align: left;
+        text-align: center;
+        font-weight: bold;
     }
 
-    th {
-        background-color: #f4f4f4;
+    td {
+        border: 1px solid black;
+        background-color: #f8ffd7;
+        padding: 8px;
+        text-align: left;
     }
 
     .no-users-message {
@@ -63,11 +66,46 @@
 
 <script>
 
+import { getUsers, deleteUserById } from '../components/getUsers.js'
+
 export default {
   data() {
     return {
-      users: [{id: 1, name: 'Juan Pérez', email: 'juan@example.com', role: 'usuario-comun'}]
+      users: []
     };
+  },
+  async created() {
+    try {
+    this.users = await getUsers();
+    console.log(users);
+    }
+    catch (error) {
+        console.error('Error al obtener usuarios', error);
+    }
+  },
+  methods: {
+    confirmDeleteUser(userId) {
+        if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
+            this.deleteUser(userId);
+        }
+    },
+    confirmEditUser(userId) {
+        if (confirm("¿Estás seguro de que quieres modificar este usuario?")) {
+            this.editUser(userId);
+        }
+    },
+    async deleteUser(userId) {
+        try {
+            await deleteUserById(userId);
+            this.users = this.users.filter(user => user.id !== userId);
+        }
+        catch (error) {
+            console.error('Error al eliminar usuario:', error);
+        }
+    },
+    editUser(userId) {
+        this.$router.push({ path: `/ModificarUsuario/${userId}` });
+    }
   }
 };
 </script>
