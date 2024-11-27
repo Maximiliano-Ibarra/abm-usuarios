@@ -1,4 +1,8 @@
 <template>
+<div>
+    <button @click="newUser()">Agregar Usuario</button>
+</div>
+<br>
 <div class = "userlist-container">
     <table>
         <thead>
@@ -41,6 +45,7 @@
     th {
         border: 1px solid black;
         background-color: #f4f4f4;
+        color: rgb(49, 187, 141);
         padding: 8px;
         text-align: center;
         font-weight: bold;
@@ -49,6 +54,7 @@
     td {
         border: 1px solid black;
         background-color: #f8ffd7;
+        color: rgb(49, 187, 141);;
         padding: 8px;
         text-align: left;
     }
@@ -66,24 +72,32 @@
 
 <script>
 
+import NewUser from '@/views/NewUser.vue';
 import { getUsers, deleteUserById } from '../components/getUsers.js'
 
 export default {
-  data() {
-    return {
-      users: []
-    };
-  },
-  async created() {
-    try {
-    this.users = await getUsers();
-    console.log(users);
-    }
-    catch (error) {
-        console.error('Error al obtener usuarios', error);
-    }
-  },
-  methods: {
+    
+    async created() {
+        try {
+            const users = await getUsers();
+            if (!users || users.length === 0) {
+                console.warn('No hay usuarios disponibles.');
+                this.users = [];
+            } else {
+                console.log('Usuarios cargados correctamente:', users);
+                this.users = users;
+            }
+        } catch (error) {
+            console.error('Error al cargar usuarios:', error.message);
+            this.users = [];
+        }
+    },
+    data() {
+      return {
+        users: []
+      };
+    },
+    methods: {
     confirmDeleteUser(userId) {
         if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
             this.deleteUser(userId);
@@ -105,6 +119,9 @@ export default {
     },
     editUser(userId) {
         this.$router.push({ path: `/ModificarUsuario/${userId}` });
+    },
+    newUser() {
+        this.$router.push({ path: `/AltaUsuario` });
     }
   }
 };

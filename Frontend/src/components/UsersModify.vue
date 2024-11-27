@@ -11,10 +11,6 @@
         <label for="email">Correo Electrónico</label><br/>
         <input id="email" class="input-field" v-model="user.email" placeholder="Ingrese su nuevo correo electrónico" required />
       </div>
-      <div class="form-group">
-        <label for="password">Contraseña</label><br/>
-        <input type="password" id="password" class="input-field" v-model="user.password" placeholder="Ingrese su nueva contraseña" required />
-      </div>
       <button @click="usersList()" style="margin-right: 200px;">Volver</button>
       <button type="submit" >Actualizar</button>
     </form>
@@ -35,7 +31,6 @@ export default {
       user: {
         username: "",
         email: "",
-        password: "",
       },
       successMessage: "",
       errorMessage: "",
@@ -46,17 +41,22 @@ export default {
       this.$router.push({ path: `/VerUsuarios` });
     },
     async updateUser() {
-      const userId = this.$route.params.id; // Supone que el ID del usuario viene como parámetro en la ruta
+      const userId = this.$route.params.id;
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:3000/api/usuarios/${userId}`, {
           method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json' },
             body: JSON.stringify(this.user)
         });
 
-        if (!response.ok) throw new Error("Error al actualizar el usuario");
-
+        if(!response.ok) {
+          throw new Error(data.message || 'Error en el inicio de sesión');
+        }
         const data = await response.json();
+        console.log(data);
 
         alert("Usuario actualizado con éxito.");
         this.usersList();
@@ -90,7 +90,7 @@ export default {
   margin: auto;
   border: 5px solid rgb(117, 92, 92); /* Cambia el color y el grosor del borde */
             padding: 20px; /* Espacio interno */
-      background-color:rgb(176, 196, 186);
+  background-color:#f8ffd7;
   border-radius: 5px;
 }
 
@@ -108,5 +108,13 @@ export default {
 .error-message {
   color: red;
   margin-top: 10px;
+}
+
+h2 {
+  color: rgb(49, 187, 141);
+}
+
+label {
+  color: rgb(49, 187, 141);
 }
 </style>

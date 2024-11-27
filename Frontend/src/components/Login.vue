@@ -1,13 +1,17 @@
 <template>
   <div class="login-container">
-    <h1>Bienvenido</h1>
-    <form @submit.prevent="login">
+    <h1 style="color: hsla(160, 100%, 37%, 1);">Bienvenido</h1>
+    <div v-if="isLoggedIn">
+      <br><p class="login-message">Hola, ya has iniciado sesión.</p><br>
+      <button @click="logout">Cerrar Sesión</button>
+    </div>
+    <form v-else @submit.prevent="login">
       <div class="form-group">
-        <label for="username">Usuario</label><br>
+        <label for="email">Correo electrónico</label><br>
         <input
           type="text"
-          id="username"
-          v-model="user"
+          id="email"
+          v-model="email"
           required
         />
       </div>
@@ -16,48 +20,94 @@
         <input
           type="password"
           id="password"
-          v-model="pass"
+          v-model="password"
           required
         />
       </div>
-      <p class="register" @click="registerUser()">No tienes un usuario? Regístrate aquí</p><br>
-      <button type="submit" style="font-size: 16px;">Iniciar Sesión</button>
+      <router-link class="register" to="/RegistrarUsuario">No tienes un usuario? Regístrate aquí</router-link><br><br>
+      <button type="submit" :disabled="loading" style="font-size: 16px;">{{ loading ? "Cargando..." : "Iniciar Sesión" }}</button>
     </form>
     <div v-if="error" class="error-message">{{ error }}</div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import { useRouter } from 'vue-router';
 
 export default {
   data() {
     return {
-      user: '',
-      pass: '',
-      error: ''
+      email: '',
+      password: '',
+      error: '',
+      loading: false,
+      isLoggedIn: false
     };
   },
-  setup() {
-    const router = useRouter();
-    return { router };
+  created() {
+  const token = localStorage.getItem('token');
+  if (token) {
+    this.isLoggedIn = true;
+  }
   },
   methods: {
     async login() {
+      this.loading = true;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.error = 'El correo electrónico no tiene un formato válido.';
+      this.loading = false;
+      return;
+    }
+
+      if (this.password.length < 6) {
+      this.error = 'La contraseña debe tener al menos 6 caracteres.';
+      this.loading = false;
+      return;
+    }
+
       try {
-        const response = await axios.post('/api/login', {
-          user: this.user,
-          pass: this.pass,
+        const response = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              email: this.email,
+              password: this.password,
+            })
         });
-        localStorage.setItem('authToken', response.data.token); // Guarda el token
-        this.router.push('/VerUsuarios'); // Redirige a la página del dashboard
-      } catch (error) {
-        this.errorMessage = 'Usuario o contraseña incorrectos';
+        const data = await response.json()
+        if(!response.ok) {
+          throw new Error(data.message || 'Error en el inicio de sesión');
+        }
+        if(response.status === 401) {
+          this.error = 'Usuario o contraseña incorrectos'
+          return
+        }
+        console.log(data);
+        localStorage.setItem('token', data.token); // Guarda el token
+        console.log('Token guardado:', localStorage.getItem('token'));
+        alert("Usuario logueado correctamente");
+        this.email = '',
+        this.password = '',
+        this.error = ''
+      } 
+      catch (error) {
+        const serverMessage = error.message || 'Error en el inicio de sesión';
+        this.error = serverMessage;
+      }
+      finally {
+        this.loading = false;
       }
     },
+    logout() {
+      localStorage.removeItem('token');
+      this.isLoggedIn = false;
+      alert('Sesión cerrada correctamente');
+    },
     registerUser() {
-      this.$router.push({ path: `/AltaUsuario` });
+      this.$router.push({ path: `/RegistrarUsuario` });
     }
   }
 };
@@ -65,12 +115,23 @@ export default {
 
 <style scoped>
 .login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   max-width: 400px;
   margin: auto;
-  border: 5px solid rgb(117, 92, 92); /* Cambia el color y el grosor del borde */
-            padding: 20px; /* Espacio interno */
-      background-color:#f8ffd7;
+  border: 5px solid rgb(117, 92, 92);
+  padding: 20px;
+  background-color:#f8ffd7;
   border-radius: 5px;
+}
+
+label {
+  color: rgb(49, 187, 141);
+}
+
+.login-container {
+  color: rgb(49, 187, 141);
 }
 
 .register {

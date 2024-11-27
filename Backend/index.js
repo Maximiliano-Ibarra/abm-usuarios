@@ -1,7 +1,5 @@
 import cors from 'cors';
 import express from 'express';
-import jwt from 'jsonwebtoken';
-import bcryptjs from 'bcrypt';
 import usersRouter from './routes/usersRouter.js';
 import { sequelize } from './config/connection.js';
 const app = express();
@@ -10,6 +8,7 @@ const PORT = 3000;
 app.use(cors({
     origin: 'http://localhost:5173'
 }));
+app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use('/api', usersRouter);
 

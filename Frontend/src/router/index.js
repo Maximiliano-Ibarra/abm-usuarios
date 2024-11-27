@@ -22,6 +22,11 @@ const router = createRouter({
       path: '/ModificarUsuario/:id',
       name: 'ModificarUsuario',
       component: () => import('../views/UsersModify.vue')
+    },
+    {
+      path: '/RegistrarUsuario',
+      name: 'RegistrarUsuario',
+      component: () => import('../views/UsersRegister.vue')
     }
   ]
 });
