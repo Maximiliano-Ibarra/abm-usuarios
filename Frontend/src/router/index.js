@@ -27,6 +27,11 @@ const router = createRouter({
       path: '/RegistrarUsuario',
       name: 'RegistrarUsuario',
       component: () => import('../views/UsersRegister.vue')
+    },
+    {
+      path: '/AdminTab',
+      name: 'PanelDeAdministracion',
+      component: () => import('../views/AdminTab.vue')
     }
   ]
 });
